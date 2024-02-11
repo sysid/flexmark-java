@@ -36,26 +36,20 @@ public class BitFieldSet<E extends Enum<E>> extends AbstractSet<E> implements Cl
 
         @SuppressWarnings("rawtypes")
         @NotNull
-        public static Enum[] getUniverseSlow(Class elementType) {
+        public static <E extends Enum<E>> Enum[] getUniverseSlow(Class<E> elementType) {
             assert (elementType.isEnum());
             Enum[] cachedUniverse = enumUniverseMap.get(elementType);
             if (cachedUniverse != null) return cachedUniverse;
 
-            Field[] fields = elementType.getFields();
-            int enums = 0;
-            for (Field field : fields) {
-                if (field.getType().isEnum()) enums++;
-            }
+            E[] constants = elementType.getEnumConstants();
+            int enums = constants.length;
 
             if (enums > 0) {
                 cachedUniverse = new Enum[enums];
 
                 enums = 0;
-                for (Field field : fields) {
-                    if (field.getType().isEnum()) {
-                        //noinspection unchecked
-                        cachedUniverse[enums++] = Enum.valueOf((Class<Enum>) field.getType(), field.getName());
-                    }
+                for (E constant : constants) {
+                    cachedUniverse[enums++] = constant;
                 }
             } else {
                 cachedUniverse = ZERO_LENGTH_ENUM_ARRAY;
@@ -73,7 +67,8 @@ public class BitFieldSet<E extends Enum<E>> extends AbstractSet<E> implements Cl
     /**
      * Returns all of the values comprising E.
      * The result is cloned and slower than SharedSecrets use but works in Java 11 and Java 8 because SharedSecrets are not shared publicly
-     * @param <E> type of enum
+     *
+     * @param <E>         type of enum
      * @param elementType class of enum
      * @return array of enum values
      */
@@ -86,7 +81,7 @@ public class BitFieldSet<E extends Enum<E>> extends AbstractSet<E> implements Cl
      * Returns all of the values comprising E.
      * The result is cloned and slower than SharedSecrets use but works in Java 11 and Java 8 because SharedSecrets are not shared publicly
      *
-     * @param <E> type of enum
+     * @param <E>         type of enum
      * @param elementType class of enum
      * @return array of bit masks for enum values
      */
@@ -439,13 +434,13 @@ public class BitFieldSet<E extends Enum<E>> extends AbstractSet<E> implements Cl
 
     public long mask(E e1) { return bitMasks[e1.ordinal()]; }
 
-    public long mask(E e1, E e2) { return bitMasks[e1.ordinal()] | bitMasks[e2.ordinal()];}
+    public long mask(E e1, E e2) { return bitMasks[e1.ordinal()] | bitMasks[e2.ordinal()]; }
 
-    public long mask(E e1, E e2, E e3) { return bitMasks[e1.ordinal()] | bitMasks[e2.ordinal()] | bitMasks[e3.ordinal()];}
+    public long mask(E e1, E e2, E e3) { return bitMasks[e1.ordinal()] | bitMasks[e2.ordinal()] | bitMasks[e3.ordinal()]; }
 
-    public long mask(E e1, E e2, E e3, E e4) { return bitMasks[e1.ordinal()] | bitMasks[e2.ordinal()] | bitMasks[e3.ordinal()] | bitMasks[e4.ordinal()];}
+    public long mask(E e1, E e2, E e3, E e4) { return bitMasks[e1.ordinal()] | bitMasks[e2.ordinal()] | bitMasks[e3.ordinal()] | bitMasks[e4.ordinal()]; }
 
-    public long mask(E e1, E e2, E e3, E e4, E e5) { return bitMasks[e1.ordinal()] | bitMasks[e2.ordinal()] | bitMasks[e3.ordinal()] | bitMasks[e4.ordinal()] | bitMasks[e5.ordinal()];}
+    public long mask(E e1, E e2, E e3, E e4, E e5) { return bitMasks[e1.ordinal()] | bitMasks[e2.ordinal()] | bitMasks[e3.ordinal()] | bitMasks[e4.ordinal()] | bitMasks[e5.ordinal()]; }
 
     @SafeVarargs
     final public long mask(E... rest) {
@@ -456,66 +451,66 @@ public class BitFieldSet<E extends Enum<E>> extends AbstractSet<E> implements Cl
         return mask;
     }
 
-    public boolean add(E e1, E e2) { return orMask(mask(e1, e2));}
+    public boolean add(E e1, E e2) { return orMask(mask(e1, e2)); }
 
-    public boolean add(E e1, E e2, E e3) { return orMask(mask(e1, e2, e3));}
+    public boolean add(E e1, E e2, E e3) { return orMask(mask(e1, e2, e3)); }
 
-    public boolean add(E e1, E e2, E e3, E e4) { return orMask(mask(e1, e2, e3, e4));}
+    public boolean add(E e1, E e2, E e3, E e4) { return orMask(mask(e1, e2, e3, e4)); }
 
-    public boolean add(E e1, E e2, E e3, E e4, E e5) { return orMask(mask(e1, e2, e3, e4, e5));}
-
-    @SafeVarargs
-    final public boolean add(E... rest) { return orMask(mask(rest));}
-
-    public boolean remove(E e1, E e2) { return andNotMask(mask(e1, e2));}
-
-    public boolean remove(E e1, E e2, E e3) { return andNotMask(mask(e1, e2, e3));}
-
-    public boolean remove(E e1, E e2, E e3, E e4) { return andNotMask(mask(e1, e2, e3, e4));}
-
-    public boolean remove(E e1, E e2, E e3, E e4, E e5) { return andNotMask(mask(e1, e2, e3, e4, e5));}
+    public boolean add(E e1, E e2, E e3, E e4, E e5) { return orMask(mask(e1, e2, e3, e4, e5)); }
 
     @SafeVarargs
-    final public boolean remove(E... rest) { return andNotMask(mask(rest));}
+    final public boolean add(E... rest) { return orMask(mask(rest)); }
+
+    public boolean remove(E e1, E e2) { return andNotMask(mask(e1, e2)); }
+
+    public boolean remove(E e1, E e2, E e3) { return andNotMask(mask(e1, e2, e3)); }
+
+    public boolean remove(E e1, E e2, E e3, E e4) { return andNotMask(mask(e1, e2, e3, e4)); }
+
+    public boolean remove(E e1, E e2, E e3, E e4, E e5) { return andNotMask(mask(e1, e2, e3, e4, e5)); }
+
+    @SafeVarargs
+    final public boolean remove(E... rest) { return andNotMask(mask(rest)); }
 
     public boolean any(E e1) { return any(mask(e1)); }
 
-    public boolean any(E e1, E e2) { return any(mask(e1, e2));}
+    public boolean any(E e1, E e2) { return any(mask(e1, e2)); }
 
-    public boolean any(E e1, E e2, E e3) { return any(mask(e1, e2, e3));}
+    public boolean any(E e1, E e2, E e3) { return any(mask(e1, e2, e3)); }
 
-    public boolean any(E e1, E e2, E e3, E e4) { return any(mask(e1, e2, e3, e4));}
+    public boolean any(E e1, E e2, E e3, E e4) { return any(mask(e1, e2, e3, e4)); }
 
-    public boolean any(E e1, E e2, E e3, E e4, E e5) { return any(mask(e1, e2, e3, e4, e5));}
+    public boolean any(E e1, E e2, E e3, E e4, E e5) { return any(mask(e1, e2, e3, e4, e5)); }
 
     @SafeVarargs
-    final public boolean any(E... rest) { return any(mask(rest));}
+    final public boolean any(E... rest) { return any(mask(rest)); }
 
     public boolean all(E e1) { return all(mask(e1)); }
 
-    public boolean all(E e1, E e2) { return all(mask(e1, e2));}
+    public boolean all(E e1, E e2) { return all(mask(e1, e2)); }
 
-    public boolean all(E e1, E e2, E e3) { return all(mask(e1, e2, e3));}
+    public boolean all(E e1, E e2, E e3) { return all(mask(e1, e2, e3)); }
 
-    public boolean all(E e1, E e2, E e3, E e4) { return all(mask(e1, e2, e3, e4));}
+    public boolean all(E e1, E e2, E e3, E e4) { return all(mask(e1, e2, e3, e4)); }
 
-    public boolean all(E e1, E e2, E e3, E e4, E e5) { return all(mask(e1, e2, e3, e4, e5));}
+    public boolean all(E e1, E e2, E e3, E e4, E e5) { return all(mask(e1, e2, e3, e4, e5)); }
 
     @SafeVarargs
-    final public boolean all(E... rest) { return all(mask(rest));}
+    final public boolean all(E... rest) { return all(mask(rest)); }
 
     public boolean none(E e1) { return none(mask(e1)); }
 
-    public boolean none(E e1, E e2) { return none(mask(e1, e2));}
+    public boolean none(E e1, E e2) { return none(mask(e1, e2)); }
 
-    public boolean none(E e1, E e2, E e3) { return none(mask(e1, e2, e3));}
+    public boolean none(E e1, E e2, E e3) { return none(mask(e1, e2, e3)); }
 
-    public boolean none(E e1, E e2, E e3, E e4) { return none(mask(e1, e2, e3, e4));}
+    public boolean none(E e1, E e2, E e3, E e4) { return none(mask(e1, e2, e3, e4)); }
 
-    public boolean none(E e1, E e2, E e3, E e4, E e5) { return none(mask(e1, e2, e3, e4, e5));}
+    public boolean none(E e1, E e2, E e3, E e4, E e5) { return none(mask(e1, e2, e3, e4, e5)); }
 
     @SafeVarargs
-    final public boolean none(E... rest) { return none(mask(rest));}
+    final public boolean none(E... rest) { return none(mask(rest)); }
 
     /**
      * Returns an iterator over the elements contained in this set.  The
@@ -686,7 +681,7 @@ public class BitFieldSet<E extends Enum<E>> extends AbstractSet<E> implements Cl
      *
      * @param c collection to be checked for containment in this set
      * @return true if this set contains all of the elements
-     *         in the specified collection
+     *     in the specified collection
      * @throws NullPointerException if the specified collection is null
      */
     public boolean containsAll(Collection<?> c) {
@@ -718,7 +713,7 @@ public class BitFieldSet<E extends Enum<E>> extends AbstractSet<E> implements Cl
                 return false;
             else
                 throw new ClassCastException(
-                        es.elementType + " != " + elementType);
+                    es.elementType + " != " + elementType);
         }
 
         long oldElements = elements;
@@ -825,7 +820,7 @@ public class BitFieldSet<E extends Enum<E>> extends AbstractSet<E> implements Cl
      * @serial include
      */
     private static class SerializationProxy<E extends Enum<E>>
-            implements java.io.Serializable
+        implements java.io.Serializable
     {
         /**
          * The element type of this enum set.
@@ -862,7 +857,7 @@ public class BitFieldSet<E extends Enum<E>> extends AbstractSet<E> implements Cl
     // readObject method for the serialization proxy pattern
     // See Effective Java, Second Ed., Item 78.
     private void readObject(java.io.ObjectInputStream stream)
-            throws java.io.InvalidObjectException {
+        throws java.io.InvalidObjectException {
         throw new java.io.InvalidObjectException("Proxy required");
     }
 
@@ -988,10 +983,10 @@ public class BitFieldSet<E extends Enum<E>> extends AbstractSet<E> implements Cl
     /**
      * Returns unsigned value for the field, except if the field is 64 bits
      *
-     * @param <E> type of enum
+     * @param <E>      type of enum
      * @param elements bit mask for elements
-     * @param e1 field to get
-     * @param maxBits maximum bits for type
+     * @param e1       field to get
+     * @param maxBits  maximum bits for type
      * @param typeName name of type
      * @return unsigned value
      */
@@ -1022,9 +1017,9 @@ public class BitFieldSet<E extends Enum<E>> extends AbstractSet<E> implements Cl
     /**
      * Returns signed value for the field, except if the field is 64 bits
      *
-     * @param <E> type of enum
+     * @param <E>      type of enum
      * @param elements bit mask for elements
-     * @param e1 field to get
+     * @param e1       field to get
      * @return unsigned value
      */
     public static <E extends Enum<E>> long getBitField(long elements, E e1) {
@@ -1227,8 +1222,8 @@ public class BitFieldSet<E extends Enum<E>> extends AbstractSet<E> implements Cl
      * @throws NullPointerException if any parameters are null
      */
     public static <E extends Enum<E>> BitFieldSet<E> of(
-            E e1, E e2, E e3, E e4,
-            E e5
+        E e1, E e2, E e3, E e4,
+        E e5
     ) {
         BitFieldSet<E> result = noneOf(e1.getDeclaringClass());
         result.add(e1);
@@ -1268,9 +1263,9 @@ public class BitFieldSet<E extends Enum<E>> extends AbstractSet<E> implements Cl
      * number of elements, but it is likely to run slower than the overloads
      * that do not use varargs.
      *
-     * @param <E>  The class of the parameter elements and of the set
+     * @param <E>            The class of the parameter elements and of the set
      * @param declaringClass declaring class of enum
-     * @param rest the remaining elements the set is to contain initially
+     * @param rest           the remaining elements the set is to contain initially
      * @return an enum set initially containing the specified elements
      * @throws NullPointerException if any of the specified elements are null,
      *                              or if rest is null
@@ -1291,7 +1286,7 @@ public class BitFieldSet<E extends Enum<E>> extends AbstractSet<E> implements Cl
      * @param from the first element in the range
      * @param to   the last element in the range
      * @return an enum set initially containing all of the elements in the
-     *         range defined by the two specified endpoints
+     *     range defined by the two specified endpoints
      * @throws NullPointerException     if {@code from} or {@code to} are null
      * @throws IllegalArgumentException if {@code from.compareTo(to) > 0}
      */
